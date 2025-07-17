@@ -24,3 +24,10 @@ def delete_task(task_id: int):
         raise HTTPException(status_code=404, detail="Task not found")
     del tasks[task_id]
     return {"message": f"Task {task_id} deleted"}
+
+def start_task(self, task_id: int):
+    updated_task = self.task_service.update_task_status(task_id, "in_progress")
+    if not updated_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return updated_task
+
