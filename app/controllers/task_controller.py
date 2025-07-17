@@ -1,26 +1,28 @@
-from fastapi import HTTPException
-from app.models.task import Task
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from app.models.task import Task, TaskFilter
+from app.services.task_service import TaskService
+from app.db.database import get_db
+from app.dependencies import get_current_user
+from app.models.user import User
 
-# Fake task store
-tasks = {}
+class TaskController:
+    def __init__(self, db: Session = Depends(get_db)):
+        self.db = db
+        self.task_service = TaskService(db)
 
-def get_all_tasks():
-    return list(tasks.values())
-
-def create_task(task: Task):
-    if task.id in tasks:
-        raise HTTPException(status_code=400, detail="Task already exists")
-    tasks[task.id] = task
-    return {"message": "Task created"}
-
-def update_task(task_id: int, task: Task = None):
-    if task_id not in tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-    tasks[task_id] = task or tasks[task_id]  # Intentional logic flaw
-    return {"message": f"Task {task_id} updated"}
-
-def delete_task(task_id: int):
-    if task_id not in tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-    del tasks[task_id]
-    return {"message": f"Task {task_id} deleted"}
+    def get_all_tasks(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        filter_params: Optional[TaskFilter] = None,
+        current_user: User = Depends(get_current_user)
+    ) -> List[Task]:
+        tasks = self.task_service.get_tasks(
+            skip=skip,
+            limit=skip + limit, 
+            filter_params=filter_params,
+            user_id=current_user.id
+        )
+        return tasks
