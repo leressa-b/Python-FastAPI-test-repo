@@ -2,6 +2,16 @@ from payment import PaymentProcessor
 
 class DummyGateway:
     def charge(self, card, amount):
+        """
+        Simulate charging a payment card for a specified amount and return a fixed transaction ID.
+        
+        Parameters:
+        	card (str): The payment card identifier.
+        	amount (float): The amount to charge.
+        
+        Returns:
+        	str: A fixed transaction ID string.
+        """
         return "txn123" 
 
 def test_charge_success():
